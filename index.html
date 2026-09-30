@@ -314,7 +314,7 @@ Yours sincerely,"></textarea>
       <input type="range" id="sig_offset_x" min="-200" max="600" step="10" value="0">
       <div class="sliderval" id="sig_offset_x_val">0 px</div>
       <label>Up ⟷ Down</label>
-      <input type="range" id="sig_offset_y" min="-500" max="500" step="10" value="0">
+      <input type="range" id="sig_offset_y" min="-900" max="2000" step="10" value="0">
       <div class="sliderval" id="sig_offset_y_val">0 px</div>
       <div class="warn" id="sigWarn">⚠️ The signature block is running close to the footer. Shorten the body text, reduce font size, or nudge it up.</div>
     </div>
@@ -366,9 +366,9 @@ const CANVAS_W = 2484, CANVAS_H = 3512;
 const LEFT = 227, RIGHT = 2257, WIDTH = RIGHT - LEFT;
 const PT_TO_PX = CANVAS_W / 595.32; // 300dpi A4 canvas vs 72pt scale
 
-const DATE_BASELINE = 780, DATE_RIGHT = 2257;
-const CONTENT_START_Y = 900;
-const SAFE_BOTTOM = 2900; // stay above the footer dotted separator (~2955)
+const DATE_BASELINE = 600, DATE_RIGHT = 2257; // tighter — header ends ~row 403
+const CONTENT_START_Y = 665; // next line right after the date
+const SAFE_BOTTOM = 3160; // stay above the "G.I.S Training Academy..." footer text (starts ~3214px)
 
 // Stamp graphic (extracted, transparent) + signature image + fixed name/title text drawn below it
 const STAMP_W = 300, STAMP_H = 295;
@@ -657,11 +657,16 @@ function drawPageToCanvas(pageIndex, canvas){
     const stackH = STAMP_H; // signature now sits centered inside the stamp, so stack height = stamp height
     const blockH = closingLineH + closingGap + stackH + 170;
 
+    // Free vertical range: from roughly the middle of the page down to just above the
+    // footer address block, regardless of how short/long the letter body is.
+    const MIN_GROUP_Y = 1700; // ~ middle of the A4 page (canvas height 3512)
     let groupY = Math.max(cy + 40, 1200) + S.sigOffsetY;
+    if(groupY < MIN_GROUP_Y){ groupY = MIN_GROUP_Y; }
     if(groupY + blockH > SAFE_BOTTOM){ groupY = SAFE_BOTTOM - blockH; }
     const warnEl = document.getElementById('sigWarn');
     if(pageIndex === activePage && warnEl){
-      warnEl.style.display = (Math.max(cy + 40, 1200) + S.sigOffsetY + blockH > SAFE_BOTTOM) ? 'block' : 'none';
+      const rawY = Math.max(Math.max(cy + 40, 1200) + S.sigOffsetY, MIN_GROUP_Y);
+      warnEl.style.display = (rawY + blockH > SAFE_BOTTOM) ? 'block' : 'none';
     }
 
     const sigX = SIG_X + S.sigOffsetX;

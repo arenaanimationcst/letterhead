@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arena-letterhead-v24';
+const CACHE_NAME = 'arena-letterhead-v27';
 const ASSETS = [
   './',
   './index.html',
